@@ -1,0 +1,14 @@
+{
+  "name": "selenium-mocha-chai-testing",
+  "scripts": {
+    "test": "node_modules/.bin/mocha Tests/DefaultTest.js --timeout 30000"
+  },
+  "private": true,
+  "devDependencies": {
+    "geckodriver": "^1.15.0",
+    "chai": "^4.1.2",
+    "numeral": "^2.0.6",
+    "mocha": "^5.2.0",
+    "selenium-webdriver": "^4.0.0-alpha.1"
+  }
+}
