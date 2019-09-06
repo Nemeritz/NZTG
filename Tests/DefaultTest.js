@@ -1,75 +1,112 @@
 const {Builder, By, until, Key} = require('selenium-webdriver');
 var numeral = require('numeral');
-const { expect, should, assert } = require('chai');
+const { expect, should, assert, before, after } = require('chai');
 
 describe('DefaultTest', () => {
-    it('should go to list and player page and compare views and check both same', async() => {
-	
-	var trendingCountFinal;
-	var playerCountFinal;
 
-	try{
-        const driver = await new Builder().forBrowser('firefox').build();
+    var driver;
 
-        await driver.get('https://www.youtube.com/');
-	await driver.wait(until.elementLocated(By.id("metadata-line")));
-	let homePageLinks = await driver.findElements(By.id("endpoint"));
-        let hrefHome = await homePageLinks;
-
-	var newRefTrending;
-	for(link in hrefHome) {
-		
-	    newRefTrending = await hrefHome[link].getAttribute("href");
-            if (newRefTrending.includes("trending")) {
-		break;
-	    }
-	}
-
-        
-	await driver.get(newRefTrending);
-        await driver.wait(until.elementLocated(By.id("metadata-line")));
-        let metaList = await driver.findElements(By.id("metadata-line"));
-        let trendingCount = await metaList[0].getText();
-        
-        trendingCountFinal = numConvert(trendingCount);
-
-        //navigate to 
-	let videoLinks = await driver.findElements(By.id("thumbnail"));
-        let hrefPlayer = await videoLinks[0];
-        let newRefPlayer = await hrefPlayer.getAttribute("href");
-        await driver.get(newRefPlayer);
-
-        await driver.wait(until.elementLocated(By.css(".short-view-count")));
-        let player = await driver.findElements(By.css(".short-view-count"));
-        let count = await player[0].getAttribute("innerText");
-        playerCount = count.split(" ")[0];
-
-        playerCountFinal = numConvert(playerCount);
-
-        // expect( function() {
-        //     (trendingCountFinal).to.equal(playerCountFinal - 1)
-        // }).to.throw( Error );
-        //assert.fail(trendingCountFinal, playerCountFinal, "Does not equal");
-
-        //expect(trendingCountFinal, "faileDDD").to.equal(playerCountFinal)
-	expect(trendingCountFinal).to.equal(playerCountFinal-1);
-	}
-
-	catch(err){
-		assert.fail('expected', 'actual', err)
-		//return;
-	}
+    beforeEach( function() {
+        driver = new Builder().forBrowser('firefox').build();
+        driver.get('https://www.youtube.com/');
     });
 
-//    after(async () => driver.quit());
-//    catch(error) {
-//        console.log(error);
-//    }
+    afterEach( function() {
+        //driver.quit();
+    })
 
+
+    // it('should go to list and player page and compare views and check both same', async() => {
+
+    //     var trendingCountFinal;
+    //     var playerCountFinal;
+
+    //     try{
+    //         await driver.wait(until.elementLocated(By.xpath('//*[@id="endpoint"]')));
+    //         let homePageLinks = await driver.findElements(By.xpath('//*[@id="endpoint"]'));
+
+    //         var newRefTrending;
+    //         for(link in homePageLinks) {
+    //             newRefTrending = await homePageLinks[link].getAttribute("href");
+    //             if (newRefTrending.includes("trending") && await homePageLinks[link].isDisplayed()) {
+    //                 await homePageLinks[link].click();
+    //                 break;
+    //             }
+    //         }  
+        
+    //         await driver.get(await driver.getCurrentUrl());
+    //         await driver.wait(until.elementLocated(By.id('metadata-line')));
+    //         let metaList = await driver.findElements(By.id('metadata-line'));
+    //         let trendingCount = await metaList[0].getText();
+            
+    //         trendingCountFinal = numConvert(trendingCount);
+    //         console.log(trendingCountFinal);
+
+    //         //navigate to player Page
+    //         let videoLinks = await driver.findElements(By.id('thumbnail'));
+    //         await videoLinks[0].click();
+            
+    //         await driver.get(await driver.getCurrentUrl());
+    //         await driver.wait(until.elementLocated(By.css('.short-view-count')));
+    //         let player = await driver.findElements(By.css('.short-view-count'));
+    //         let count = await player[0].getAttribute('innerText');
+    //         playerCount = count.split(" ")[0];
+    //         playerCountFinal = numConvert(playerCount);
+    //         console.log(playerCountFinal)
+
+    //         return expect(trendingCountFinal).to.equal(playerCountFinal);
+    //     }
+        
+    //     catch(err){
+    //         assert.fail('expected', 'actual', err)
+    //         return;
+    //     }
+    // });
+
+    it('should go to a trending video look for comment with replies and check there are the same amount of replies as shown', async() => {
+
+        var trendingCountFinal;
+        var playerCountFinal;
+
+        try{
+            await driver.wait(until.elementLocated(By.id('thumbnail')));
+            let videoLinks = await driver.findElements(By.id('thumbnail'));
+            await videoLinks[0].click();
+            
+            //navigate to first video player page
+            await driver.get(await driver.getCurrentUrl());
+
+            await driver.wait(until.elementLocated(By.xpath('//div[@id="loaded-replies"]//yt-formatted-string[@id="content-text"]')));
+            let player = await driver.findElements(By.xpath('//div[@id="loaded-replies"]//yt-formatted-string[@id="content-text"]'));
+            
+            console.log(player);
+
+            for(x in player){
+
+                console.log(await player[x].getText());
+            }
+
+            //await player[0].click();
+
+            // var newRefTrending;
+            // for(link in homePageLinks) {
+            //     newRefTrending = await homePageLinks[link].getAttribute("href");
+            //     if (newRefTrending.includes("trending") && await homePageLinks[link].isDisplayed()) {
+            //         await homePageLinks[link].click();
+            //         break;
+            //     }
+            // }  
+
+            //return expect(trendingCountFinal).to.equal(playerCountFinal);
+        }
+        
+        catch(err){
+            assert.fail('expected', 'actual', err)
+            return;
+        }
+    });
 
 });
-
-
 
 function numConvert(n) {
  	numResult = n.split("\n")[0].split(" ")[0];
