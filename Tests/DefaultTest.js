@@ -1,4 +1,4 @@
-const {Builder, By, until, Key} = require('selenium-webdriver');
+const {Builder, By, until, Key, executeScript} = require('selenium-webdriver');
 var numeral = require('numeral');
 const { expect, should, assert, before, after } = require('chai');
 
@@ -65,9 +65,6 @@ describe('DefaultTest', () => {
 
     it('should go to a trending video look for comment with replies and check there are the same amount of replies as shown', async() => {
 
-        var trendingCountFinal;
-        var playerCountFinal;
-
         try{
             await driver.wait(until.elementLocated(By.id('thumbnail')));
             let videoLinks = await driver.findElements(By.id('thumbnail'));
@@ -76,28 +73,30 @@ describe('DefaultTest', () => {
             //navigate to first video player page
             await driver.get(await driver.getCurrentUrl());
 
-            await driver.wait(until.elementLocated(By.xpath('//div[@id="loaded-replies"]//yt-formatted-string[@id="content-text"]')));
-            let player = await driver.findElements(By.xpath('//div[@id="loaded-replies"]//yt-formatted-string[@id="content-text"]'));
-            
-            console.log(player);
+            await driver.wait(until.elementLocated(By.xpath('//paper-button[@id="button"][@class="style-scope ytd-button-renderer"]')));
+            body = await driver.findElement(By.css('body'));
+            await body.sendKeys(Key.PAGE_DOWN);
+            await driver.wait(until.elementLocated(By.xpath('//paper-button[@id="button"][@class="style-scope ytd-button-renderer"]')));
+
+            let player = await driver.findElements(By.xpath('//paper-button[@id="button"][@class="style-scope ytd-button-renderer"]'));
 
             for(x in player){
-
-                console.log(await player[x].getText());
+                var buttonText = await player[x].getText();
+                console.log(buttonText);
+                if (buttonText.includes("View")&& buttonText.includes("repl")) {
+                    await player[x].click();
+                    await openRepliesRecursive(driver, 0);
+                    break;
+                }
             }
 
-            //await player[0].click();
+            let replyCountShown = parseInt(buttonText.split(" ")[1]);
+            let replyCountCounted = await countReplies(driver);
+            
+            console.log(replyCountCounted);
+            console.log(replyCountShown);
 
-            // var newRefTrending;
-            // for(link in homePageLinks) {
-            //     newRefTrending = await homePageLinks[link].getAttribute("href");
-            //     if (newRefTrending.includes("trending") && await homePageLinks[link].isDisplayed()) {
-            //         await homePageLinks[link].click();
-            //         break;
-            //     }
-            // }  
-
-            //return expect(trendingCountFinal).to.equal(playerCountFinal);
+            return expect(replyCountShown).to.equal(1+replyCountCounted);
         }
         
         catch(err){
@@ -106,7 +105,51 @@ describe('DefaultTest', () => {
         }
     });
 
+    
+
+
 });
+
+
+
+async function openRepliesRecursive(driver, originalCommentCount) {
+
+    await driver.wait(async function() {
+        let newReplies = await countReplies(driver); 
+        console.log("funcran " + originalCommentCount + " " + newReplies);
+        return newReplies > originalCommentCount;
+    }, 20000);
+
+    body = await driver.findElement(By.css('body'));
+    await body.sendKeys(Key.PAGE_DOWN);
+
+    let replies = await driver.findElements(By.xpath('//*[contains(text(), "replies")]'));
+
+    for(x in replies){
+        var buttonText = await replies[x].getText();
+        if (buttonText.includes("Show more replies")) {
+            replyButton = await replies[x].findElements(By.xpath('./..'));
+            await driver.executeScript("arguments[0].click();", replyButton[0]);
+            await openRepliesRecursive(driver, await countReplies(driver));
+            break;
+        }
+    }
+
+   return;
+}
+
+async function countReplies(driver) {
+    comments = await driver.findElements(By.css(".ytd-comment-replies-renderer"));
+            
+    var commentCount = 0;
+    for (comment in comments) {
+        if(await comments[comment].getAttribute("is-reply") != null && await comments[comment].isDisplayed()) {
+            commentCount++;
+        }
+    }
+    console.log("Num Comments: " + commentCount);
+    return commentCount;
+}
 
 function numConvert(n) {
  	numResult = n.split("\n")[0].split(" ")[0];
