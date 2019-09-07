@@ -12,56 +12,56 @@ describe('DefaultTest', () => {
     });
 
     afterEach( function() {
-        //driver.quit();
+       driver.quit();
     })
 
 
-    // it('should go to list and player page and compare views and check both same', async() => {
+    it('should go to list and player page and compare views and check both same', async() => {
 
-    //     var trendingCountFinal;
-    //     var playerCountFinal;
+        var trendingCountFinal;
+        var playerCountFinal;
 
-    //     try{
-    //         await driver.wait(until.elementLocated(By.xpath('//*[@id="endpoint"]')));
-    //         let homePageLinks = await driver.findElements(By.xpath('//*[@id="endpoint"]'));
+        try{
+            await driver.wait(until.elementLocated(By.xpath('//*[@id="endpoint"]')));
+            let homePageLinks = await driver.findElements(By.xpath('//*[@id="endpoint"]'));
 
-    //         var newRefTrending;
-    //         for(link in homePageLinks) {
-    //             newRefTrending = await homePageLinks[link].getAttribute("href");
-    //             if (newRefTrending.includes("trending") && await homePageLinks[link].isDisplayed()) {
-    //                 await homePageLinks[link].click();
-    //                 break;
-    //             }
-    //         }  
+            var newRefTrending;
+            for(link in homePageLinks) {
+                newRefTrending = await homePageLinks[link].getAttribute("href");
+                if (newRefTrending.includes("trending") && await homePageLinks[link].isDisplayed()) {
+                    await homePageLinks[link].click();
+                    break;
+                }
+            }  
         
-    //         await driver.get(await driver.getCurrentUrl());
-    //         await driver.wait(until.elementLocated(By.id('metadata-line')));
-    //         let metaList = await driver.findElements(By.id('metadata-line'));
-    //         let trendingCount = await metaList[0].getText();
+            await driver.get(await driver.getCurrentUrl());
+            await driver.wait(until.elementLocated(By.id('metadata-line')));
+            let metaList = await driver.findElements(By.id('metadata-line'));
+            let trendingCount = await metaList[0].getText();
             
-    //         trendingCountFinal = numConvert(trendingCount);
-    //         console.log(trendingCountFinal);
+            trendingCountFinal = numConvert(trendingCount);
+            console.log(trendingCountFinal);
 
-    //         //navigate to player Page
-    //         let videoLinks = await driver.findElements(By.id('thumbnail'));
-    //         await videoLinks[0].click();
+            //navigate to player Page
+            let videoLinks = await driver.findElements(By.id('thumbnail'));
+            await videoLinks[0].click();
             
-    //         await driver.get(await driver.getCurrentUrl());
-    //         await driver.wait(until.elementLocated(By.css('.short-view-count')));
-    //         let player = await driver.findElements(By.css('.short-view-count'));
-    //         let count = await player[0].getAttribute('innerText');
-    //         playerCount = count.split(" ")[0];
-    //         playerCountFinal = numConvert(playerCount);
-    //         console.log(playerCountFinal)
+            await driver.get(await driver.getCurrentUrl());
+            await driver.wait(until.elementLocated(By.css('.short-view-count')));
+            let player = await driver.findElements(By.css('.short-view-count'));
+            let count = await player[0].getAttribute('innerText');
+            playerCount = count.split(" ")[0];
+            playerCountFinal = numConvert(playerCount);
+            console.log(playerCountFinal)
 
-    //         return expect(trendingCountFinal).to.equal(playerCountFinal);
-    //     }
+            return expect(trendingCountFinal).to.equal(playerCountFinal);
+        }
         
-    //     catch(err){
-    //         assert.fail('expected', 'actual', err)
-    //         return;
-    //     }
-    // });
+        catch(err){
+            assert.fail('expected', 'actual', err)
+            return;
+        }
+    });
 
     it('should go to a trending video look for comment with replies and check there are the same amount of replies as shown', async() => {
 
@@ -96,7 +96,7 @@ describe('DefaultTest', () => {
             console.log(replyCountCounted);
             console.log(replyCountShown);
 
-            return expect(replyCountShown).to.equal(1+replyCountCounted);
+            return expect(replyCountShown).to.equal(replyCountCounted);
         }
         
         catch(err){
@@ -106,7 +106,54 @@ describe('DefaultTest', () => {
     });
 
     
+    it('should go to a trending video and see if the profile pic of the videos uploader is the same as the one in their channel', async() => {
 
+        var imageSrcPlayer;
+        var imageUserPage;
+
+        try{
+            await driver.wait(until.elementLocated(By.id('thumbnail')));
+            let videoLinks = await driver.findElements(By.id('thumbnail'));
+            await videoLinks[0].click();
+            
+            //navigate to first video player page
+            await driver.get(await driver.getCurrentUrl());
+
+            body = await driver.findElement(By.css('body'));
+            await body.sendKeys(Key.PAGE_DOWN);
+
+            await driver.wait(until.elementLocated(By.css('a.ytd-video-owner-renderer')));
+
+            await driver.wait(async function() {
+                let images = await driver.findElements(By.css('a.ytd-video-owner-renderer')); 
+                for (image in images) {
+                    var src = await images[image].getAttribute("href");
+                    var src1 = await images[image].findElements(By.xpath(".//*"));
+                    var src2 = await src1[0].findElements(By.xpath(".//*"));
+                    imageSrcPlayer = await src2[0].getAttribute("src");
+
+                    if (src != null && (src.includes("user") || src.include("channel"))) {
+                        await images[image].click();
+                        await driver.get(driver.getCurrentUrl());
+                        return true;
+                    }
+                }
+                return false;
+            }, 20000);
+
+            await driver.wait(until.elementLocated(By.id('channel-header-container')));
+            var avatarElement = await driver.findElements(By.id('avatar'));
+            var img = await avatarElement[0].findElements(By.xpath('.//*'));
+            imageUserPage = await img[0].getAttribute("src");
+            
+            return expect(imageUserPage.split("=")[0]).to.equal(imageSrcPlayer.split("=")[0]);
+        }
+        
+        catch(err){
+            assert.fail('expected', 'actual', err)
+            return;
+        }
+    });
 
 });
 
@@ -115,8 +162,7 @@ describe('DefaultTest', () => {
 async function openRepliesRecursive(driver, originalCommentCount) {
 
     await driver.wait(async function() {
-        let newReplies = await countReplies(driver); 
-        console.log("funcran " + originalCommentCount + " " + newReplies);
+        let newReplies = await countReplies(driver);
         return newReplies > originalCommentCount;
     }, 20000);
 
