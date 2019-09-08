@@ -125,7 +125,7 @@ describe('DefaultTest', () => {
                     var srcs = await images[image].findElements(By.xpath(".//yt-img-shadow//img"));
                     imageSrcPlayer = await srcs[0].getAttribute("src");
 
-                    if (channelUrl != null && (channelUrl.include("user") || channelUrl.include("channel"))) {
+                    if (channelUrl != null && (channelUrl.includes("user") || channelUrl.includes("channel"))) {
                         await images[image].click();
                         await driver.get(driver.getCurrentUrl());
                         return true;
