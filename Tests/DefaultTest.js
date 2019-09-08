@@ -12,7 +12,7 @@ describe('DefaultTest', () => {
     });
 
     afterEach( function() {
-       driver.quit();
+        driver.quit();
     })
 
 
@@ -40,7 +40,6 @@ describe('DefaultTest', () => {
             let trendingCount = await metaList[0].getText();
             
             trendingCountFinal = numConvert(trendingCount);
-            console.log(trendingCountFinal);
 
             //navigate to player Page
             let videoLinks = await driver.findElements(By.id('thumbnail'));
@@ -52,7 +51,6 @@ describe('DefaultTest', () => {
             let count = await player[0].getAttribute('innerText');
             playerCount = count.split(" ")[0];
             playerCountFinal = numConvert(playerCount);
-            console.log(playerCountFinal)
 
             return expect(trendingCountFinal).to.equal(playerCountFinal);
         }
@@ -82,7 +80,6 @@ describe('DefaultTest', () => {
 
             for(x in player){
                 var buttonText = await player[x].getText();
-                console.log(buttonText);
                 if (buttonText.includes("View")&& buttonText.includes("repl")) {
                     await player[x].click();
                     await openRepliesRecursive(driver, 0);
@@ -92,9 +89,6 @@ describe('DefaultTest', () => {
 
             let replyCountShown = parseInt(buttonText.split(" ")[1]);
             let replyCountCounted = await countReplies(driver);
-            
-            console.log(replyCountCounted);
-            console.log(replyCountShown);
 
             return expect(replyCountShown).to.equal(replyCountCounted);
         }
@@ -155,6 +149,43 @@ describe('DefaultTest', () => {
         }
     });
 
+
+    it('search for youtube and sort by sort by view count and first video show despacito', async() => {
+
+
+        try{
+            await driver.wait(until.elementLocated(By.xpath('//input[@id="search"]')));
+            let searchBox = await driver.findElements(By.xpath('//input[@id="search"]'));
+            await searchBox[0].sendKeys("Youtube", Key.ENTER);
+
+            await driver.wait(until.elementLocated(By.xpath('//yt-formatted-string[contains(text(), "Filter")]')));
+            let filterButton = await driver.findElements(By.xpath('//yt-formatted-string[contains(text(), "Filter")]'));
+            await filterButton[0].click();
+
+            var previousUrl = await driver.getCurrentUrl();
+
+            await driver.wait(until.elementLocated(By.xpath('//yt-formatted-string[contains(text(), "View count")]')));
+            ViewFilterButton = await driver.findElements(By.xpath('//yt-formatted-string[contains(text(), "View count")]'));
+            await ViewFilterButton[0].click();
+
+            await driver.wait(async function() {
+                let newUrl = await driver.getCurrentUrl();
+                return newUrl != previousUrl;
+            }, 20000);
+
+            await driver.get(driver.getCurrentUrl());
+            await driver.wait(until.elementLocated(By.id('video-title')));
+            let videos = await driver.findElements(By.id('video-title'));
+            let topVideo = await videos[0].getText();
+            
+            expect(topVideo).to.equal("Luis Fonsi - Despacito ft. Daddy Yankee");
+        }
+        
+        catch(err){
+            assert.fail('expected', 'actual', err)
+            return;
+        }
+    });
 });
 
 
@@ -171,10 +202,10 @@ async function openRepliesRecursive(driver, originalCommentCount) {
 
     let replies = await driver.findElements(By.xpath('//*[contains(text(), "replies")]'));
 
-    for(x in replies){
-        var buttonText = await replies[x].getText();
+    for(reply in replies){
+        var buttonText = await replies[reply].getText();
         if (buttonText.includes("Show more replies")) {
-            replyButton = await replies[x].findElements(By.xpath('./..'));
+            replyButton = await replies[reply].findElements(By.xpath('./..'));
             await driver.executeScript("arguments[0].click();", replyButton[0]);
             await openRepliesRecursive(driver, await countReplies(driver));
             break;
@@ -193,7 +224,6 @@ async function countReplies(driver) {
             commentCount++;
         }
     }
-    console.log("Num Comments: " + commentCount);
     return commentCount;
 }
 
