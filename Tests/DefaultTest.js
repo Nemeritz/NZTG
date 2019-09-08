@@ -174,8 +174,7 @@ describe('DefaultTest', () => {
 
             var previousUrl = await driver.getCurrentUrl();
 
-            await driver.wait(until.elementLocated(By.xpath('//yt-formatted-string[contains(text(), "View count")]')));
-            ViewFilterButton = await driver.findElements(By.xpath('//yt-formatted-string[contains(text(), "View count")]'));
+            ViewFilterButton = await waitAndFind(driver, "xpath", '//yt-formatted-string[contains(text(), "View count")]');
             await ViewFilterButton[0].click();
 
             //wait for new search filter to apply and load
@@ -186,9 +185,7 @@ describe('DefaultTest', () => {
 
             await driver.get(driver.getCurrentUrl());
 
-            
-            await driver.wait(until.elementLocated(By.id('video-title')));
-            let videos = await driver.findElements(By.id('video-title'));
+            let videos = await waitAndFind(driver, "id", "video-title");
             let topVideo = await videos[0].getText();
             
             expect(topVideo).to.equal("Luis Fonsi - Despacito ft. Daddy Yankee");
@@ -205,11 +202,11 @@ describe('DefaultTest', () => {
 async function waitAndFind(driver, method, arg) {
     var byObject;
     switch (method) {
-        case id: byObject = By.id(arg);
+        case "id": byObject = By.id(arg);
             break;
-        case css: byObject = By.css(arg);
+        case "css": byObject = By.css(arg);
             break;
-        case xpath: byObject = By.xpath(arg);
+        case "xpath": byObject = By.xpath(arg);
     }
 
     await driver.wait(until.elementLocated(byObject));
