@@ -22,6 +22,7 @@ describe('DefaultTest', () => {
         var playerCountFinal;
 
         try{
+            //find trending button and click
             await driver.wait(until.elementLocated(By.xpath('//*[@id="endpoint"]')));
             let homePageLinks = await driver.findElements(By.xpath('//*[@id="endpoint"]'));
 
@@ -34,6 +35,7 @@ describe('DefaultTest', () => {
                 }
             }  
         
+            //find No1 trending video and get view count
             await driver.get(await driver.getCurrentUrl());
             await driver.wait(until.elementLocated(By.id('metadata-line')));
             let metaList = await driver.findElements(By.id('metadata-line'));
@@ -44,8 +46,9 @@ describe('DefaultTest', () => {
             //navigate to player Page
             let videoLinks = await driver.findElements(By.id('thumbnail'));
             await videoLinks[0].click();
-            
             await driver.get(await driver.getCurrentUrl());
+
+            //find count from player page
             await driver.wait(until.elementLocated(By.css('.short-view-count')));
             let player = await driver.findElements(By.css('.short-view-count'));
             let count = await player[0].getAttribute('innerText');
@@ -64,6 +67,7 @@ describe('DefaultTest', () => {
     it('should go to a trending video look for comment with replies and check there are the same amount of replies as shown', async() => {
 
         try{
+            
             await driver.wait(until.elementLocated(By.id('thumbnail')));
             let videoLinks = await driver.findElements(By.id('thumbnail'));
             await videoLinks[0].click();
@@ -71,17 +75,20 @@ describe('DefaultTest', () => {
             //navigate to first video player page
             await driver.get(await driver.getCurrentUrl());
 
+            //wait for some of page to load and scroll down
             await driver.wait(until.elementLocated(By.xpath('//paper-button[@id="button"][@class="style-scope ytd-button-renderer"]')));
             body = await driver.findElement(By.css('body'));
             await body.sendKeys(Key.PAGE_DOWN);
-            await driver.wait(until.elementLocated(By.xpath('//paper-button[@id="button"][@class="style-scope ytd-button-renderer"]')));
 
+            //Click View xx Repl
+            await driver.wait(until.elementLocated(By.xpath('//paper-button[@id="button"][@class="style-scope ytd-button-renderer"]')));
             let player = await driver.findElements(By.xpath('//paper-button[@id="button"][@class="style-scope ytd-button-renderer"]'));
 
             for(x in player){
                 var buttonText = await player[x].getText();
                 if (buttonText.includes("View")&& buttonText.includes("repl")) {
                     await player[x].click();
+                    //click open all 'view more replies'
                     await openRepliesRecursive(driver, 0);
                     break;
                 }
@@ -116,8 +123,8 @@ describe('DefaultTest', () => {
             body = await driver.findElement(By.css('body'));
             await body.sendKeys(Key.PAGE_DOWN);
 
+            //find user profile of uploader of video
             await driver.wait(until.elementLocated(By.css('a.ytd-video-owner-renderer')));
-
             await driver.wait(async function() {
                 let images = await driver.findElements(By.css('a.ytd-video-owner-renderer')); 
                 for (image in images) {
@@ -135,6 +142,7 @@ describe('DefaultTest', () => {
                 return false;
             }, 20000);
 
+            //fetch image src from user/channel page
             await driver.wait(until.elementLocated(By.id('channel-header-container')));
             var avatarElement = await driver.findElements(By.id('avatar'));
             var img = await avatarElement[0].findElements(By.xpath('.//*'));
@@ -154,10 +162,12 @@ describe('DefaultTest', () => {
 
 
         try{
+            //search with keyword being "youtube"
             await driver.wait(until.elementLocated(By.xpath('//input[@id="search"]')));
             let searchBox = await driver.findElements(By.xpath('//input[@id="search"]'));
             await searchBox[0].sendKeys("Youtube", Key.ENTER);
 
+            //click filter and filter by view count
             await driver.wait(until.elementLocated(By.xpath('//yt-formatted-string[contains(text(), "Filter")]')));
             let filterButton = await driver.findElements(By.xpath('//yt-formatted-string[contains(text(), "Filter")]'));
             await filterButton[0].click();
@@ -168,12 +178,14 @@ describe('DefaultTest', () => {
             ViewFilterButton = await driver.findElements(By.xpath('//yt-formatted-string[contains(text(), "View count")]'));
             await ViewFilterButton[0].click();
 
+            //wait for new search filter to apply and load
             await driver.wait(async function() {
                 let newUrl = await driver.getCurrentUrl();
                 return newUrl != previousUrl;
             }, 20000);
 
             await driver.get(driver.getCurrentUrl());
+
             await driver.wait(until.elementLocated(By.id('video-title')));
             let videos = await driver.findElements(By.id('video-title'));
             let topVideo = await videos[0].getText();
