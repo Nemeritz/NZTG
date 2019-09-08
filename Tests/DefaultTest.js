@@ -143,7 +143,7 @@ describe('DefaultTest', () => {
             }, 20000);
 
             //fetch image src from user/channel page
-            await driver.wait(until.elementLocated(By.id('channel-header-container')));
+            await driver.wait(until.elementLocated(By.id('avatar')));
             var avatarElement = await driver.findElements(By.id('avatar'));
             var img = await avatarElement[0].findElements(By.xpath('.//*'));
             imageUserPage = await img[0].getAttribute("src");
@@ -186,6 +186,7 @@ describe('DefaultTest', () => {
 
             await driver.get(driver.getCurrentUrl());
 
+            
             await driver.wait(until.elementLocated(By.id('video-title')));
             let videos = await driver.findElements(By.id('video-title'));
             let topVideo = await videos[0].getText();
@@ -201,6 +202,19 @@ describe('DefaultTest', () => {
 });
 
 
+async function waitAndFind(driver, method, arg) {
+    var byObject;
+    switch (method) {
+        case id: byObject = By.id(arg);
+            break;
+        case css: byObject = By.css(arg);
+            break;
+        case xpath: byObject = By.xpath(arg);
+    }
+
+    await driver.wait(until.elementLocated(byObject));
+    return await driver.findElements(byObject);
+}
 
 async function openRepliesRecursive(driver, originalCommentCount) {
 
