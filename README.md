@@ -1,13 +1,14 @@
 # NZTG
 
-Requirements:
+*Requirements*
 Firefox version needs to be min 57.
 
-Setup and run:
+*Setup and run*
 `npm install` to install dependant packages 
 `npm run test` to run
 
-Project to test some youtube functionalities
+*Tests*
+
 Test 1: View count in trending list view of trending video 1 is same as view count in player page.
 
 Test 2: View replies in a comment shows correct number of replies (check by expanding counting all replies)
