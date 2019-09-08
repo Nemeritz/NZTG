@@ -1,13 +1,13 @@
 # NZTG
 
-*Requirements*
+#####Requirements
 Firefox version needs to be min 57.
 
-*Setup and run*
+#####Setup and run
 `npm install` to install dependant packages 
 `npm run test` to run
 
-*Tests*
+#####Tests
 
 Test 1: View count in trending list view of trending video 1 is same as view count in player page.
 
