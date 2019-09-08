@@ -3,6 +3,7 @@
 #### Requirements
 1. Firefox version needs to be min 57.
 2. If running on windows make sure geckdriver is added to path in environmental variables
+3. Install latest version of NodeJS
 
 #### Setup and run
 `npm install` to install dependant packages 
