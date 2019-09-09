@@ -1,7 +1,6 @@
-const {Builder, By, until, Key, executeScript} = require('selenium-webdriver');
-var numeral = require('numeral');
-const { expect, should, assert, before, after } = require('chai');
-const {driver, initDriver, numConvert, waitAndFind, openRepliesRecursive, countReplies} = require('../Helper.js');
+const {By, until, Key} = require('selenium-webdriver');
+const { expect, assert } = require('chai');
+const {driver, waitAndFind, openRepliesRecursive, countReplies} = require('../Helper.js');
 
 it('should go to a trending video look for comment with replies and check there are the same amount of replies as shown', async() => {
 

@@ -1,6 +1,5 @@
 var numeral = require('numeral');
 const {Builder, By, until, Key} = require('selenium-webdriver');
-const {countReplies} = require('./Helper.js');
 
     var globalDriver;
 
@@ -19,6 +18,7 @@ module.exports = {
         return;
     },
 
+    /*Combines wait and find of driver so don't have to type line twice*/
     waitAndFind: async function(globalDriver, method, arg) {
         var byObject;
         switch (method) {
@@ -33,64 +33,50 @@ module.exports = {
         return await globalDriver.findElements(byObject);
     },
 
+    /*Recursively open view more replies button in test 2*/
     openRepliesRecursive: async function(globalDriver, originalCommentCount) {
-
-        console.log(1);
 
         await globalDriver.wait(async function() {
             let newReplies = await module.exports.countReplies(globalDriver);
             return newReplies > originalCommentCount;
         }, 20000);
 
-        console.log(2);
-
         body = await globalDriver.findElement(By.css('body'));
         await body.sendKeys(Key.PAGE_DOWN);
 
-        console.log(3);
-
         let replies = await globalDriver.findElements(By.xpath('//*[contains(text(), "replies")]'));
-
-        console.log(4);
 
         for(reply in replies){
             var buttonText = await replies[reply].getText();
-            console.log(5);
             if (buttonText.includes("Show more replies")) {
-                console.log(6);
                 replyButton = await replies[reply].findElements(By.xpath('./..'));
-                console.log(7);
                 await globalDriver.executeScript("arguments[0].click();", replyButton[0]);
-                console.log(8);
                 await module.exports.openRepliesRecursive(globalDriver, await module.exports.countReplies(globalDriver));
                 break;
             }
         }
-        console.log(5);
     return;
     },
 
+    /*Count the number of replies on the page for test 2*/
     countReplies: async function(globalDriver) {
-        console.log(9);
         comments = await module.exports.waitAndFind(globalDriver, "css", ".ytd-comment-replies-renderer");
-        console.log(10);
         var commentCount = 0;
         for (comment in comments) {
-            console.log(11);
             try {
                 if(await comments[comment].getAttribute("is-reply") != null && await comments[comment].isDisplayed()) {
                     commentCount++;
-                    console.log(12);
                 }
             }
             catch(err) {
-                console.log(err);
+                console.log("STALE");
+                commentCount = commentCount;
             }
         }
-        console.log(13);
         return commentCount;
     },
 
+    /*Convert number from shortened string format to int*/
     numConvert: function(n) {
         numResult = n.split("\n")[0].split(" ")[0];
             var multiplier = 1;

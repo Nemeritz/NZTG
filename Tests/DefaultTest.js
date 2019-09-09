@@ -1,5 +1,4 @@
-const {} = require('selenium-webdriver');
-const { quitDriver, initDriver, driver } = require('./Helper.js');
+const { quitDriver, initDriver } = require('./Helper.js');
 
 function importTest(name, path) {
     describe(name, function () {
