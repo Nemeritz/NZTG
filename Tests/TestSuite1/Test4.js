@@ -1,7 +1,6 @@
-const {Builder, By, until, Key, executeScript} = require('selenium-webdriver');
-var numeral = require('numeral');
-const { expect, should, assert, before, after } = require('chai');
-const {driver, initDriver, numConvert, waitAndFind, openRepliesRecursive, countReplies} = require('../Helper.js');
+const {Key} = require('selenium-webdriver');
+const { expect, assert } = require('chai');
+const { driver, waitAndFind} = require('../Helper.js');
 
 it('search for youtube and sort by sort by view count and first video show despacito', async() => {
     

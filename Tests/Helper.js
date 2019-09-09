@@ -70,7 +70,6 @@ module.exports = {
             }
             catch(err) {
                 console.log("STALE");
-                commentCount = commentCount;
             }
         }
         return commentCount;

@@ -1,7 +1,6 @@
-const {Builder, By, until, Key, executeScript} = require('selenium-webdriver');
-var numeral = require('numeral');
-const { expect, should, assert, before, after } = require('chai');
-const {driver, initdriver, numConvert, waitAndFind, openRepliesRecursive, countReplies} = require('../Helper.js');
+const { By } = require('selenium-webdriver');
+const { expect, assert } = require('chai');
+const { driver, numConvert, waitAndFind } = require('../Helper.js');
 
 
 it('should go to list and player page and compare views and check both same', async() => {
@@ -10,7 +9,6 @@ it('should go to list and player page and compare views and check both same', as
     var playerCountFinal;
 
     try{
-
         //find trending button and click
         let homePageLinks = await waitAndFind(driver(), "xpath", '//*[@id="endpoint"]');
 
