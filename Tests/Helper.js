@@ -1,9 +1,25 @@
 var numeral = require('numeral');
-const {By, until, Key} = require('selenium-webdriver');
+const {Builder, By, until, Key} = require('selenium-webdriver');
 const {countReplies} = require('./Helper.js');
 
+    var globalDriver;
+
 module.exports = {
-    waitAndFind: async function(driver, method, arg) {
+
+    driver: function () {return globalDriver;},
+
+    initDriver: function() {
+        globalDriver = new Builder().forBrowser('firefox').build();
+        globalDriver.get('https://www.youtube.com/');
+        return globalDriver;
+    },
+
+    quitDriver: function() {
+        globalDriver.quit();
+        return;
+    },
+
+    waitAndFind: async function(globalDriver, method, arg) {
         var byObject;
         switch (method) {
             case "id": byObject = By.id(arg);
@@ -13,43 +29,65 @@ module.exports = {
             case "xpath": byObject = By.xpath(arg);
         }
 
-        await driver.wait(until.elementLocated(byObject));
-        return await driver.findElements(byObject);
+        await globalDriver.wait(until.elementLocated(byObject));
+        return await globalDriver.findElements(byObject);
     },
 
-    openRepliesRecursive: async function(driver, originalCommentCount) {
+    openRepliesRecursive: async function(globalDriver, originalCommentCount) {
 
-        await driver.wait(async function() {
-            let newReplies = await module.exports.countReplies(driver);
+        console.log(1);
+
+        await globalDriver.wait(async function() {
+            let newReplies = await module.exports.countReplies(globalDriver);
             return newReplies > originalCommentCount;
         }, 20000);
 
-        body = await driver.findElement(By.css('body'));
+        console.log(2);
+
+        body = await globalDriver.findElement(By.css('body'));
         await body.sendKeys(Key.PAGE_DOWN);
 
-        let replies = await driver.findElements(By.xpath('//*[contains(text(), "replies")]'));
+        console.log(3);
+
+        let replies = await globalDriver.findElements(By.xpath('//*[contains(text(), "replies")]'));
+
+        console.log(4);
 
         for(reply in replies){
             var buttonText = await replies[reply].getText();
+            console.log(5);
             if (buttonText.includes("Show more replies")) {
+                console.log(6);
                 replyButton = await replies[reply].findElements(By.xpath('./..'));
-                await driver.executeScript("arguments[0].click();", replyButton[0]);
-                await module.exports.openRepliesRecursive(driver, await module.exports.countReplies(driver));
+                console.log(7);
+                await globalDriver.executeScript("arguments[0].click();", replyButton[0]);
+                console.log(8);
+                await module.exports.openRepliesRecursive(globalDriver, await module.exports.countReplies(globalDriver));
                 break;
             }
         }
+        console.log(5);
     return;
     },
 
-    countReplies: async function(driver) {
-        comments = await driver.findElements(By.css(".ytd-comment-replies-renderer"));
-                
+    countReplies: async function(globalDriver) {
+        console.log(9);
+        comments = await module.exports.waitAndFind(globalDriver, "css", ".ytd-comment-replies-renderer");
+        console.log(10);
         var commentCount = 0;
         for (comment in comments) {
-            if(await comments[comment].getAttribute("is-reply") != null && await comments[comment].isDisplayed()) {
-                commentCount++;
+            console.log(11);
+            try {
+                if(await comments[comment].getAttribute("is-reply") != null && await comments[comment].isDisplayed()) {
+                    commentCount++;
+                    console.log(12);
+                }
+            }
+            catch(err) {
+                console.log(err);
             }
         }
+        console.log(13);
         return commentCount;
     },
 
