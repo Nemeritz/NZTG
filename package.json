@@ -5,7 +5,7 @@
   },
   "private": true,
   "devDependencies": {
-    "geckodriver": "^1.15.0",
+    "geckodriver": "^3.2.0",
     "chai": "^4.1.2",
     "numeral": "^2.0.6",
     "mocha": "^5.2.0",
